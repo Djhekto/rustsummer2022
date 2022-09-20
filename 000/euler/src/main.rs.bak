@@ -1,0 +1,94 @@
+//   	dx/dt = y      
+//  	dy/dt = x -  (x^3) – delta * y + gamma * cos(w*t)
+//      w = 1; delta = 0.25; gamma = 0,3 
+//      При t на отрезке от 0 до 20; 
+//      Шаг берем равным 0.01 
+//      Начальная точка обладает следующими координатами (0.1 ; 0.1).
+
+use raylib::prelude::*;
+use std::io;
+//use raylib::rgui;
+//use raylib::RaylibHandle; //https://docs.rs/raylib/0.9.1/raylib/struct.RaylibHandle.html
+
+fn scanf64 () -> f64 {
+ let mut buf = String::new();
+ io::stdin().read_line(&mut buf).expect("не получилось прочитать строку");
+ let fbuf: f64 = buf.trim().parse().expect("не получилось сделать флоат");
+ return fbuf;
+}
+
+fn scani32 () -> i32 {
+    let mut buf = String::new();
+    io::stdin().read_line(&mut buf).expect("не получилось прочитать строку");
+    let fbuf: i32 = buf.trim().parse().expect("не получилось сделать интеджер");
+    return fbuf;
+   }
+
+fn main() 
+{
+println!(" введите: x0, y0, шаг , кол-во шагов ");
+println!(" -0.1; 0.1; 0.01; 5000; ");
+let mut x = scanf64();     //println!("{}", x);
+let mut y = scanf64();
+let shag = scanf64();
+let shagov = scani32();
+
+println!(" введите: w, дельта, гамма");
+println!(" 1; 0.25; 0.3 ");
+let w = scanf64();
+let delta = scanf64();
+let gamma = scanf64();
+
+let mut t:f64 = 0.0;
+let mut xl: Vec<f64> = Vec::new();
+let mut yl: Vec<f64> = Vec::new();
+xl.push(x);         //for i in &mut xl {  println!("{}", i);  }
+yl.push(y);
+//----------------------
+for i in 0..shagov 
+{   
+    let i1:usize = i as usize;  //костыль, ибо раст не берет интеджер как индекс списка
+    t+=shag;
+    y += shag * (xl[i1] - xl[i1].powi(3) - delta*yl[i1] + gamma * (t*w).cos() );
+    x += shag * yl[i1];
+    xl.push(x);
+    yl.push(y);
+}
+let wwidth = 1900;
+let whidth = 900;
+let xstart:f32 = (wwidth as f32) - 1200.0;
+let ystart:f32 = (whidth as f32) - 400.0;
+let mashtab:f32 = 200.0;
+//let vec1:Vector2 = Vector2::zero();
+
+//----------------------------------------------------------------------//
+    let (mut rl, thread) = raylib::init()
+        .size(wwidth, whidth)
+        .title("euler")
+        .build();
+//-----------------
+    while !rl.window_should_close() {
+        let mut d = rl.begin_drawing(&thread);
+
+        let vecx1:Vector2 = Vector2::new(0.0, ystart);
+        let vecx2:Vector2 = Vector2::new(wwidth as f32, ystart);
+        let vecy1:Vector2 = Vector2::new(xstart, 0.0);
+        let vecy2:Vector2 = Vector2::new(xstart, whidth as f32);
+     // d.draw_line(0,ystart,wwidth,ystart,Color::DARKBLUE);
+        d.draw_line_ex(vecx1,vecx2,3.0,Color::DARKBLUE);
+        d.draw_line_ex(vecy1,vecy2,3.0,Color::DARKBLUE);
+//-----------------
+for i in 1..shagov 
+{   
+    let i1:usize = i as usize;  //костыль, ибо раст не берет интеджер как индекс списка
+    let vecm1:Vector2 = Vector2::new(xstart + mashtab * xl[i1-1] as f32, ystart + mashtab * yl[i1-1] as f32);
+    let vecm2:Vector2 = Vector2::new(xstart + mashtab * xl[i1] as f32, ystart + mashtab * yl[i1] as f32);
+    d.draw_line_ex(vecm1,vecm2,2.0,Color::RED);
+}
+//----------------
+        d.clear_background(Color::WHITE);
+   //   d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
+    }
+//----------------
+
+}
